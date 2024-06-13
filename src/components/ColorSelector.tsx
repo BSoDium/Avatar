@@ -58,7 +58,7 @@ export default function ColorSelector({
             border-top-left-radius: 0;
             background-color: ${value};
             color: ${isDark ? "white" : "black"};
-            min-width: 5.4rem;
+            width: 5rem;
             flex: 1;
             &:hover {
               background-color: ${color.alpha(0.8).css()};

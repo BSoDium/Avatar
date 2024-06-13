@@ -1,5 +1,5 @@
 import "./App.global.scss";
-import { ThemeProvider } from "./components/ThemeProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { css } from "@emotion/css";
 import colors from "@/assets/colors.json";
 import { useEffect, useMemo, useState } from "react";
@@ -9,19 +9,50 @@ import {
   Rounding,
   roundingOptions,
   RoundingSelector,
-} from "./components/RoudingSelector";
-import ExportSelector from "./components/ExportSelector";
-import { AspectRatio } from "./components/ui/aspect-ratio";
-import ColorSelector from "./components/ColorSelector";
+} from "@/components/RoudingSelector";
+import ExportSelector from "@/components/ExportSelector";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import ColorSelector from "@/components/ColorSelector";
 import { useSearchParams } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
-import OptionSelector from "./components/OptionSelector";
+import OptionSelector from "@/components/OptionSelector";
+import { Button } from "@/components/ui/button";
+import { FiShuffle } from "react-icons/fi";
+import ContrastWatcher from "./components/ContrastWatcher";
 
 const borderRadii: Record<Rounding, string> = {
   circle: "50%",
   squircle: "30%",
-  square: "0",
+  square: "calc(var(--radius) - 2px)",
 };
+
+function genTonal(primary: string) {
+  const primaryColor = chroma(primary).hsl();
+  return chroma
+    .hsl(
+      primaryColor[0],
+      primaryColor[1] * 1.3,
+      Math.max(Math.min(primaryColor[2] * 1.3, 1), 0.7)
+    )
+    .hex();
+}
+
+function genSecondary(primary: string) {
+  const primaryColor = chroma(primary).hsl();
+  return chroma
+    .hsl(primaryColor[0] + 180, primaryColor[1] * 0.5, primaryColor[2] * 0.9)
+    .hex();
+}
+
+function genBackground(primary: string) {
+  const primaryColor = chroma(primary).hsl();
+  return chroma.hsl(primaryColor[0], primaryColor[1] * 0.5, 0.9).hex();
+}
+
+function randomColor(
+) {
+  return chroma.random().hex();
+}
 
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -55,58 +86,23 @@ function App() {
 
   // Relational color generation
   useEffect(() => {
-    if (!tonalLock) {
-      const primaryColor = chroma(primary).hsl();
-      const tonalColor = chroma
-        .hsl(
-          primaryColor[0],
-          primaryColor[1] * 0.6,
-          Math.max(primaryColor[2] * 1.1, 0.6)
-        )
-        .hex();
-      setTonal(tonalColor);
-    }
+    if (!tonalLock) setTonal(genTonal(primary));
   }, [primary, tonalLock]);
 
   useEffect(() => {
-    if (!secondaryLock) {
-      const primaryColor = chroma(primary).hsl();
-      const secondaryColor = chroma
-        .hsl(
-          primaryColor[0] + 180,
-          primaryColor[1] * 0.5,
-          primaryColor[2] * 0.9
-        )
-        .hex();
-      setSecondary(secondaryColor);
-    }
+    if (!secondaryLock) setSecondary(genSecondary(primary));
   }, [primary, secondaryLock]);
 
-  useEffect(() => {
-    if (!primaryLock && secondaryLock) {
-      const secondaryColor = chroma(secondary).hsl();
-      const primaryColor = chroma
-        .hsl(
-          secondaryColor[0] + 180,
-          Math.min(secondaryColor[1] * 2, 1),
-          Math.min(secondaryColor[2] * 1.1, 1)
-        )
-        .hex();
-      setPrimary(primaryColor);
-    }
-  }, [secondary, primaryLock, secondaryLock]);
-
-  // Background color based on primary color
   const background = useMemo(() => {
-    const primaryColor = chroma(primary).hsl();
-    return chroma
-      .hsl(
-        primaryColor[0],
-        primaryColor[1] * 0.5,
-        0.90,
-      )
-      .hex();
+    return genBackground(primary);
   }, [primary]);
+
+  // Random color generation
+  const randomize = () => {
+    if (!primaryLock) setPrimary(randomColor());
+    if (!secondaryLock) setSecondary(randomColor());
+    if (!tonalLock) setTonal(randomColor());
+  };
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
@@ -117,7 +113,7 @@ function App() {
           width: 100vw;
           display: flex;
           justify-content: center;
-          align-items: center;
+          padding-top: clamp(2rem, 10vw, 8rem);
         `}
       >
         <div
@@ -189,8 +185,26 @@ function App() {
                 setLock={setTonalLock}
               />
             </section>
+            <Button
+              variant="secondary"
+              onClick={randomize}
+              className={css`
+                width: 100%;
+              `}
+            >
+              <FiShuffle className="mr-2 h-4 w-4" />
+              Randomize
+            </Button>
           </div>
           <OptionSelector />
+          <ContrastWatcher
+            {...{
+              primary,
+              secondary,
+              tonal,
+              background,
+            }}
+          />
           <ExportSelector />
         </div>
       </div>

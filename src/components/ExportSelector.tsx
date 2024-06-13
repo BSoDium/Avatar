@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { TbVectorSpline } from "react-icons/tb";
+import { TbVectorTriangle } from "react-icons/tb";
 
 export default function ExportSelector() {
   /**
@@ -158,12 +158,12 @@ export default function ExportSelector() {
           <DropdownMenuLabel>File format</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={downloadSVG}>
-            <TbVectorSpline className="mr-2 h-4 w-4" />
-            <span>Vector graphics</span>
+            <TbVectorTriangle className="mr-2 h-4 w-4" />
+            <span>Vector graphics - SVG</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={downloadPNG}>
             <FiImage className="mr-2 h-4 w-4" />
-            <span>Rasterized</span>
+            <span>Rasterized - PNG</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
