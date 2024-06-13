@@ -1,19 +1,21 @@
 import { css } from "@emotion/css";
 import { Button } from "./ui/button";
 import chroma from "chroma-js";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { FiLock, FiUnlock } from "react-icons/fi";
 
 export default function ColorSelector({
   value,
-  onChange,
+  setValue,
+  lock,
+  setLock,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  setValue: (value: string) => void;
+  lock: boolean;
+  setLock: (lock: boolean) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const [lock, setLock] = useState(false);
 
   const color = useMemo(() => chroma(value), [value]);
   const isDark = useMemo(() => color.luminance() < 0.5, [color]);
@@ -23,6 +25,10 @@ export default function ColorSelector({
       className={css`
         display: flex;
         flex-direction: row;
+        transform-origin: 20% 50%;
+        transition: scale ease 0.2s;
+        scale: ${lock ? 0.95 : 1};
+        flex: 1;
       `}
     >
       <Button
@@ -43,6 +49,7 @@ export default function ColorSelector({
           position: relative;
           display: flex;
           flex-direction: row;
+          flex: 1;
         `}
       >
         <Button
@@ -51,6 +58,8 @@ export default function ColorSelector({
             border-top-left-radius: 0;
             background-color: ${value};
             color: ${isDark ? "white" : "black"};
+            min-width: 5.5rem;
+            flex: 1;
             &:hover {
               background-color: ${color.alpha(0.8).css()};
             }
@@ -65,7 +74,7 @@ export default function ColorSelector({
           ref={inputRef}
           type="color"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => setValue(e.target.value)}
           className={css`
             position: absolute;
             bottom: -0.2rem;

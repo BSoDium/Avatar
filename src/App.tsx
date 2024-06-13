@@ -13,10 +13,21 @@ import DownloadSelector from "./components/DownloadSelector";
 import { AspectRatio } from "./components/ui/aspect-ratio";
 import ColorSelector from "./components/ColorSelector";
 
+const borderRadii: Record<Rounding, string> = {
+  circle: "50%",
+  squircle: "30%",
+  square: "0",
+};
+
 function App() {
+  const [primaryLock, setPrimaryLock] = useState(false);
+  const [secondaryLock, setSecondaryLock] = useState(false);
+  const [tonalLock, setTonalLock] = useState(false);
+
   const [primary, setPrimary] = useState(colors.primary);
   const [secondary, setSecondary] = useState(colors.secondary);
   const [tonal, setTonal] = useState(colors.tonal);
+
   const [rounding, setRounding] = useState<Rounding>(roundingOptions[0]);
 
   return (
@@ -50,11 +61,7 @@ function App() {
                 width: 100%;
                 height: 100%;
                 transition: border-radius ease 0.2s;
-                border-radius: ${rounding === "circle"
-                  ? "50%"
-                  : rounding === "squircle"
-                  ? "30%"
-                  : "0"};
+                border-radius: ${borderRadii[rounding]};
               `}
             />
           </AspectRatio>
@@ -76,25 +83,33 @@ function App() {
             <section
               className={css`
                 display: flex;
-                flex-direction: row;
+                flex-flow: row wrap;
+                justify-content: center;
+                width: 100%;
                 gap: 0.5rem;
               `}
             >
-              <ColorSelector 
+              <ColorSelector
                 value={primary}
-                onChange={setPrimary}
+                setValue={setPrimary}
+                lock={primaryLock}
+                setLock={setPrimaryLock}
               />
-              <ColorSelector 
+              <ColorSelector
                 value={secondary}
-                onChange={setSecondary}
+                setValue={setSecondary}
+                lock={secondaryLock}
+                setLock={setSecondaryLock}
               />
-              <ColorSelector 
+              <ColorSelector
                 value={tonal}
-                onChange={setTonal}
+                setValue={setTonal}
+                lock={tonalLock}
+                setLock={setTonalLock}
               />
             </section>
-            <DownloadSelector />
           </div>
+          <DownloadSelector />
         </div>
       </div>
     </ThemeProvider>
