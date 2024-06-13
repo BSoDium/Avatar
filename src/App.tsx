@@ -2,16 +2,18 @@ import "./App.global.scss";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { css } from "@emotion/css";
 import colors from "@/assets/colors.json";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Model from "./assets/Model";
 import {
   Rounding,
   roundingOptions,
   RoundingSelector,
 } from "./components/RoudingSelector";
-import DownloadSelector from "./components/DownloadSelector";
+import ExportSelector from "./components/ExportSelector";
 import { AspectRatio } from "./components/ui/aspect-ratio";
 import ColorSelector from "./components/ColorSelector";
+import { useSearchParams } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
 
 const borderRadii: Record<Rounding, string> = {
   circle: "50%",
@@ -20,18 +22,35 @@ const borderRadii: Record<Rounding, string> = {
 };
 
 function App() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [primaryLock, setPrimaryLock] = useState(false);
   const [secondaryLock, setSecondaryLock] = useState(false);
   const [tonalLock, setTonalLock] = useState(false);
 
-  const [primary, setPrimary] = useState(colors.primary);
-  const [secondary, setSecondary] = useState(colors.secondary);
-  const [tonal, setTonal] = useState(colors.tonal);
+  const [primary, setPrimary] = useState(
+    searchParams.get("primary") || colors.primary
+  );
+  const [secondary, setSecondary] = useState(
+    searchParams.get("secondary") || colors.secondary
+  );
+  const [tonal, setTonal] = useState(searchParams.get("tonal") || colors.tonal);
 
-  const [rounding, setRounding] = useState<Rounding>(roundingOptions[0]);
+  const [rounding, setRounding] = useState<Rounding>(
+    (searchParams.get("rounding") as Rounding) || roundingOptions[0]
+  );
+
+  useEffect(() => {
+    searchParams.set("primary", primary);
+    searchParams.set("secondary", secondary);
+    searchParams.set("tonal", tonal);
+    searchParams.set("rounding", rounding);
+    setSearchParams(searchParams);
+  }, [primary, rounding, searchParams, secondary, setSearchParams, tonal]);
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
+      <Toaster />
       <div
         className={css`
           height: 100vh;
@@ -109,7 +128,7 @@ function App() {
               />
             </section>
           </div>
-          <DownloadSelector />
+          <ExportSelector />
         </div>
       </div>
     </ThemeProvider>
