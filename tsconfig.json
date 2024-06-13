@@ -32,6 +32,9 @@
   "include": [
     "src"
   ],
+  "exclude": [
+    "**/*.template.tsx"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
