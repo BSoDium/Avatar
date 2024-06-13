@@ -21,6 +21,9 @@ import { toast } from "sonner";
 import { TbVectorSpline } from "react-icons/tb";
 
 export default function ExportSelector() {
+  /**
+   * Copy the current URL to the clipboard
+   */
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     toast("Link has been copied", {
@@ -34,6 +37,9 @@ export default function ExportSelector() {
     });
   };
 
+  /**
+   * Share the current URL using the Web Share API
+   */
   const share = () => {
     navigator.share({
       title: "Color Generator",
@@ -42,8 +48,12 @@ export default function ExportSelector() {
     });
   };
 
+  /**
+   * Download the current SVG as a file
+   */
   const downloadSVG = () => {
     const svg = document.querySelector("svg");
+    if (!svg) return;
     const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -53,8 +63,12 @@ export default function ExportSelector() {
     URL.revokeObjectURL(url);
   };
 
+  /**
+   * Download the current SVG as a PNG file
+   */
   const downloadPNG = () => {
     const svg = document.querySelector("svg");
+    if (!svg) return;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
     const svgString = new XMLSerializer().serializeToString(svg);
@@ -67,6 +81,7 @@ export default function ExportSelector() {
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
       canvas.toBlob((blob) => {
+        if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -97,7 +112,7 @@ export default function ExportSelector() {
     <section
       className={css`
         display: flex;
-        flex-direction: row;
+        flex-flow: row wrap;
         gap: 0.5rem;
         width: 100%;
       `}
