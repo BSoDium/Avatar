@@ -26,10 +26,12 @@ const borderRadii: Record<Rounding, string> = {
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Color locks
   const [primaryLock, setPrimaryLock] = useState(false);
   const [secondaryLock, setSecondaryLock] = useState(false);
   const [tonalLock, setTonalLock] = useState(false);
 
+  // Color states
   const [primary, setPrimary] = useState(
     searchParams.get("primary") || colors.primary
   );
@@ -42,6 +44,7 @@ function App() {
     (searchParams.get("rounding") as Rounding) || roundingOptions[0]
   );
 
+  // Update URL search params
   useEffect(() => {
     searchParams.set("primary", primary);
     searchParams.set("secondary", secondary);
@@ -51,7 +54,6 @@ function App() {
   }, [primary, rounding, searchParams, secondary, setSearchParams, tonal]);
 
   // Relational color generation
-
   useEffect(() => {
     if (!tonalLock) {
       const primaryColor = chroma(primary).hsl();
@@ -94,6 +96,7 @@ function App() {
     }
   }, [secondary, primaryLock, secondaryLock]);
 
+  // Background color based on primary color
   const background = useMemo(() => {
     const primaryColor = chroma(primary).hsl();
     return chroma
