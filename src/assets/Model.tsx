@@ -6,7 +6,7 @@ export type Colors = typeof colors;
 export default function Model(props: Colors & ComponentProps<"svg">) {
   return (<svg {...props} width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g id="model" clipPath="url(#clip0_19_5)">
-    <rect width="500" height="500" fill="#EFDDD6" />
+    <rect width="500" height="500" fill={props.background} />
     <path id="jacket"
       d="M54.1249 311.165L0 373.5V500H500V401.276L406.747 298.198C385.751 274.989 356.519 260.902 325.284 258.939L278.5 256L142.027 266.803C108.043 269.493 76.4756 285.424 54.1249 311.165Z"
       fill={props.secondary} />

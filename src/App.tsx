@@ -2,8 +2,9 @@ import "./App.global.scss";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { css } from "@emotion/css";
 import colors from "@/assets/colors.json";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Model from "./assets/Model";
+import chroma from "chroma-js";
 import {
   Rounding,
   roundingOptions,
@@ -49,6 +50,61 @@ function App() {
     setSearchParams(searchParams);
   }, [primary, rounding, searchParams, secondary, setSearchParams, tonal]);
 
+  // Relational color generation
+
+  useEffect(() => {
+    if (!tonalLock) {
+      const primaryColor = chroma(primary).hsl();
+      const tonalColor = chroma
+        .hsl(
+          primaryColor[0],
+          primaryColor[1] * 0.6,
+          Math.max(primaryColor[2] * 1.1, 0.6)
+        )
+        .hex();
+      setTonal(tonalColor);
+    }
+  }, [primary, tonalLock]);
+
+  useEffect(() => {
+    if (!secondaryLock) {
+      const primaryColor = chroma(primary).hsl();
+      const secondaryColor = chroma
+        .hsl(
+          primaryColor[0] + 180,
+          primaryColor[1] * 0.5,
+          primaryColor[2] * 0.9
+        )
+        .hex();
+      setSecondary(secondaryColor);
+    }
+  }, [primary, secondaryLock]);
+
+  useEffect(() => {
+    if (!primaryLock && secondaryLock) {
+      const secondaryColor = chroma(secondary).hsl();
+      const primaryColor = chroma
+        .hsl(
+          secondaryColor[0] + 180,
+          Math.min(secondaryColor[1] * 2, 1),
+          Math.min(secondaryColor[2] * 1.1, 1)
+        )
+        .hex();
+      setPrimary(primaryColor);
+    }
+  }, [secondary, primaryLock, secondaryLock]);
+
+  const background = useMemo(() => {
+    const primaryColor = chroma(primary).hsl();
+    return chroma
+      .hsl(
+        primaryColor[0],
+        primaryColor[1] * 0.5,
+        0.90,
+      )
+      .hex();
+  }, [primary]);
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
       <Toaster />
@@ -76,6 +132,7 @@ function App() {
                 primary,
                 secondary,
                 tonal,
+                background,
               }}
               className={css`
                 width: 100%;
