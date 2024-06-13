@@ -52,13 +52,13 @@ export default function ExportSelector() {
    * Download the current SVG as a file
    */
   const downloadSVG = () => {
-    const svg = document.querySelector("svg");
+    const svg = document.querySelector("svg#model");
     if (!svg) return;
     const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "colors.svg";
+    a.download = "avatar.svg";
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -67,7 +67,7 @@ export default function ExportSelector() {
    * Download the current SVG as a PNG file
    */
   const downloadPNG = () => {
-    const svg = document.querySelector("svg");
+    const svg = document.querySelector("svg#model");
     if (!svg) return;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
@@ -85,7 +85,7 @@ export default function ExportSelector() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "colors.png";
+        a.download = "avatar.png";
         a.click();
         URL.revokeObjectURL(url);
       });

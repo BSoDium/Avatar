@@ -14,6 +14,7 @@ import { AspectRatio } from "./components/ui/aspect-ratio";
 import ColorSelector from "./components/ColorSelector";
 import { useSearchParams } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import OptionSelector from "./components/OptionSelector";
 
 const borderRadii: Record<Rounding, string> = {
   circle: "50%",
@@ -82,6 +83,7 @@ function App() {
                 transition: border-radius ease 0.2s;
                 border-radius: ${borderRadii[rounding]};
               `}
+              id="model"
             />
           </AspectRatio>
           <div
@@ -128,6 +130,7 @@ function App() {
               />
             </section>
           </div>
+          <OptionSelector />
           <ExportSelector />
         </div>
       </div>
