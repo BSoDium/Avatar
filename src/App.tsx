@@ -19,6 +19,7 @@ import OptionSelector from "@/components/OptionSelector";
 import { Button } from "@/components/ui/button";
 import { FiShuffle } from "react-icons/fi";
 import ViolationWatcher from "@/components/ViolationWatcher";
+import Socials from "./components/Socials";
 
 const borderRadii: Record<Rounding, string> = {
   circle: "50%",
@@ -152,112 +153,113 @@ export default function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-        <Toaster />
+      <Toaster />
+      <div
+        className={css`
+          min-height: 100vh;
+          width: 100vw;
+          display: flex;
+          justify-content: center;
+          padding-top: clamp(2rem, 10vw, 8rem);
+          padding-bottom: clamp(1rem, 5vw, 4rem);
+        `}
+      >
+        <Socials />
         <div
           className={css`
-            min-height: 100vh;
-            width: 100vw;
             display: flex;
-            justify-content: center;
-            padding-top: clamp(2rem, 10vw, 8rem);
-            padding-bottom: clamp(1rem, 5vw, 4rem);
+            gap: 2rem;
+            flex-direction: column;
+            align-items: center;
+            width: min(90vw, 25rem);
           `}
         >
-          <div
-            className={css`
-              display: flex;
-              gap: 2rem;
-              flex-direction: column;
-              align-items: center;
-              width: min(90vw, 25rem);
-            `}
-          >
-            <AspectRatio ratio={1}>
-              <Model
-                {...{
-                  primary,
-                  secondary,
-                  tonal,
-                  background,
-                }}
-                className={css`
-                  width: 100%;
-                  height: 100%;
-                  transition: border-radius ease 0.2s;
-                  border-radius: ${borderRadii[rounding]};
-                `}
-                id="model"
-              />
-            </AspectRatio>
-            <div
-              className={css`
-                display: flex;
-                gap: 1rem;
-                width: 100%;
-                flex-direction: column;
-                align-items: center;
-              `}
-            >
-              <RoundingSelector
-                value={rounding}
-                onChange={(value) => {
-                  setRounding(value);
-                }}
-              />
-              <section
-                className={css`
-                  display: flex;
-                  flex-flow: row wrap;
-                  justify-content: center;
-                  width: 100%;
-                  gap: 0.5rem;
-                `}
-              >
-                <ColorSelector
-                  value={primary}
-                  setValue={setPrimary}
-                  lock={primaryLock}
-                  setLock={setPrimaryLock}
-                  label="Primary"
-                />
-                <ColorSelector
-                  value={secondary}
-                  setValue={setSecondary}
-                  lock={secondaryLock}
-                  setLock={setSecondaryLock}
-                  label="Secondary"
-                />
-                <ColorSelector
-                  value={tonal}
-                  setValue={setTonal}
-                  lock={tonalLock}
-                  setLock={setTonalLock}
-                  label="Tonal"
-                />
-              </section>
-              <Button
-                variant="secondary"
-                onClick={randomize}
-                className={css`
-                  width: 100%;
-                `}
-              >
-                <FiShuffle className="mr-2 h-4 w-4" />
-                Randomize
-              </Button>
-            </div>
-            <OptionSelector />
-            <ViolationWatcher
+          <AspectRatio ratio={1}>
+            <Model
               {...{
                 primary,
                 secondary,
                 tonal,
                 background,
               }}
+              className={css`
+                width: 100%;
+                height: 100%;
+                transition: border-radius ease 0.2s;
+                border-radius: ${borderRadii[rounding]};
+              `}
+              id="model"
             />
-            <ExportSelector />
+          </AspectRatio>
+          <div
+            className={css`
+              display: flex;
+              gap: 1rem;
+              width: 100%;
+              flex-direction: column;
+              align-items: center;
+            `}
+          >
+            <RoundingSelector
+              value={rounding}
+              onChange={(value) => {
+                setRounding(value);
+              }}
+            />
+            <section
+              className={css`
+                display: flex;
+                flex-flow: row wrap;
+                justify-content: center;
+                width: 100%;
+                gap: 0.5rem;
+              `}
+            >
+              <ColorSelector
+                value={primary}
+                setValue={setPrimary}
+                lock={primaryLock}
+                setLock={setPrimaryLock}
+                label="Primary"
+              />
+              <ColorSelector
+                value={secondary}
+                setValue={setSecondary}
+                lock={secondaryLock}
+                setLock={setSecondaryLock}
+                label="Secondary"
+              />
+              <ColorSelector
+                value={tonal}
+                setValue={setTonal}
+                lock={tonalLock}
+                setLock={setTonalLock}
+                label="Tonal"
+              />
+            </section>
+            <Button
+              variant="secondary"
+              onClick={randomize}
+              className={css`
+                width: 100%;
+              `}
+            >
+              <FiShuffle className="mr-2 h-4 w-4" />
+              Randomize
+            </Button>
           </div>
+          <OptionSelector />
+          <ViolationWatcher
+            {...{
+              primary,
+              secondary,
+              tonal,
+              background,
+            }}
+          />
+          <ExportSelector />
         </div>
+      </div>
     </ThemeProvider>
   );
 }

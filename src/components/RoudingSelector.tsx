@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const roundingOptions = ["circle", "squircle", "square"] as const;
 export type Rounding = (typeof roundingOptions)[number];

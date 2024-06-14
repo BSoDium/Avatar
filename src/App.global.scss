@@ -75,3 +75,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes degressive-blur {
+  0% {
+    filter: blur(10px);
+  }
+  100% {
+    filter: blur(0);
+  }
+}

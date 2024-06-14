@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 export default function OptionSelector() {
   const [showGlasses, setShowGlasses] = useState(false);
 
-  const svg = document.querySelector("svg#model");
+  const svg = document.querySelector("svg#model") as SVGElement | null;
 
   useEffect(() => {
     if (!svg) return;
@@ -15,6 +15,14 @@ export default function OptionSelector() {
     if (!glasses) return;
     glasses.style.display = showGlasses ? "block" : "none";
   }, [svg, showGlasses]);
+
+  const easterEgg = () => {
+    const duration = 4000;
+    document.body.style.animation = `degressive-blur ${duration}ms`;
+    setTimeout(() => {
+      document.body.style.animation = "";
+    }, duration);
+  };
 
   return (
     <div
@@ -33,15 +41,25 @@ export default function OptionSelector() {
           flex-direction: row;
           align-items: center;
           gap: 0.9rem;
+          cursor: pointer;
         `}
       >
-        <PiEyeglassesLight className="h-8 w-8" />
+        <PiEyeglassesLight
+          className={`h-8 w-8 ${css`
+            transition: transform 0.2s;
+            &:hover {
+              transform: scale(1.1);
+            }
+          `}`}
+          onClick={easterEgg}
+        />
         <p
           className={css`
             display: flex;
             flex-direction: column;
             gap: 0.3rem;
           `}
+          onClick={() => setShowGlasses(!showGlasses)}
         >
           Display glasses
           <span className="text-xs text-muted-foreground">
