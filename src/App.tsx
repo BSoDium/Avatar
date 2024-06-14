@@ -18,7 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import OptionSelector from "@/components/OptionSelector";
 import { Button } from "@/components/ui/button";
 import { FiShuffle } from "react-icons/fi";
-import ContrastWatcher from "./components/ContrastWatcher";
+import ViolationWatcher from "@/components/ViolationWatcher";
 
 const borderRadii: Record<Rounding, string> = {
   circle: "50%",
@@ -26,6 +26,11 @@ const borderRadii: Record<Rounding, string> = {
   square: "calc(var(--radius) - 2px)",
 };
 
+/**
+ * Generate tonal color
+ * @param primary the primary color
+ * @returns the adjusted tonal color
+ */
 function genTonal(primary: string) {
   const primaryColor = chroma(primary).hsl();
   return chroma
@@ -37,6 +42,11 @@ function genTonal(primary: string) {
     .hex();
 }
 
+/**
+ * Generate secondary color
+ * @param primary the primary color
+ * @returns the adjusted secondary color
+ */
 function genSecondary(primary: string) {
   const primaryColor = chroma(primary).hsl();
   return chroma
@@ -44,17 +54,50 @@ function genSecondary(primary: string) {
     .hex();
 }
 
+/**
+ * Generate background color
+ * @param primary the primary color
+ * @returns the adjusted background color
+ */
 function genBackground(primary: string) {
   const primaryColor = chroma(primary).hsl();
   return chroma.hsl(primaryColor[0], primaryColor[1] * 0.5, 0.9).hex();
 }
 
 function randomColor(
+  {
+    minHue = 0,
+    maxHue = 360,
+    minSaturation = 0.5,
+    maxSaturation = 1,
+    minLightness = 0.5,
+    maxLightness = 0.9,
+  }: {
+    minHue?: number;
+    maxHue?: number;
+    minSaturation?: number;
+    maxSaturation?: number;
+    minLightness?: number;
+    maxLightness?: number;
+  } = {
+    minHue: 0,
+    maxHue: 360,
+    minSaturation: 0.5,
+    maxSaturation: 1,
+    minLightness: 0.5,
+    maxLightness: 0.9,
+  }
 ) {
-  return chroma.random().hex();
+  return chroma
+    .hsl(
+      Math.random() * (maxHue - minHue) + minHue,
+      Math.random() * (maxSaturation - minSaturation) + minSaturation,
+      Math.random() * (maxLightness - minLightness) + minLightness
+    )
+    .hex();
 }
 
-function App() {
+export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Color locks
@@ -99,117 +142,122 @@ function App() {
 
   // Random color generation
   const randomize = () => {
-    if (!primaryLock) setPrimary(randomColor());
-    if (!secondaryLock) setSecondary(randomColor());
-    if (!tonalLock) setTonal(randomColor());
+    if (primaryLock) {
+      if (!tonalLock) setTonal(randomColor({ minLightness: 0.5 }));
+      if (!secondaryLock) setSecondary(randomColor());
+    } else {
+      setPrimary(randomColor());
+    }
   };
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-      <Toaster />
-      <div
-        className={css`
-          height: 100vh;
-          width: 100vw;
-          display: flex;
-          justify-content: center;
-          padding-top: clamp(2rem, 10vw, 8rem);
-        `}
-      >
+        <Toaster />
         <div
           className={css`
+            min-height: 100vh;
+            width: 100vw;
             display: flex;
-            gap: 2rem;
-            flex-direction: column;
-            align-items: center;
-            width: min(90vw, 25rem);
+            justify-content: center;
+            padding-top: clamp(2rem, 10vw, 8rem);
+            padding-bottom: clamp(1rem, 5vw, 4rem);
           `}
         >
-          <AspectRatio ratio={1}>
-            <Model
+          <div
+            className={css`
+              display: flex;
+              gap: 2rem;
+              flex-direction: column;
+              align-items: center;
+              width: min(90vw, 25rem);
+            `}
+          >
+            <AspectRatio ratio={1}>
+              <Model
+                {...{
+                  primary,
+                  secondary,
+                  tonal,
+                  background,
+                }}
+                className={css`
+                  width: 100%;
+                  height: 100%;
+                  transition: border-radius ease 0.2s;
+                  border-radius: ${borderRadii[rounding]};
+                `}
+                id="model"
+              />
+            </AspectRatio>
+            <div
+              className={css`
+                display: flex;
+                gap: 1rem;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+              `}
+            >
+              <RoundingSelector
+                value={rounding}
+                onChange={(value) => {
+                  setRounding(value);
+                }}
+              />
+              <section
+                className={css`
+                  display: flex;
+                  flex-flow: row wrap;
+                  justify-content: center;
+                  width: 100%;
+                  gap: 0.5rem;
+                `}
+              >
+                <ColorSelector
+                  value={primary}
+                  setValue={setPrimary}
+                  lock={primaryLock}
+                  setLock={setPrimaryLock}
+                  label="Primary"
+                />
+                <ColorSelector
+                  value={secondary}
+                  setValue={setSecondary}
+                  lock={secondaryLock}
+                  setLock={setSecondaryLock}
+                  label="Secondary"
+                />
+                <ColorSelector
+                  value={tonal}
+                  setValue={setTonal}
+                  lock={tonalLock}
+                  setLock={setTonalLock}
+                  label="Tonal"
+                />
+              </section>
+              <Button
+                variant="secondary"
+                onClick={randomize}
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <FiShuffle className="mr-2 h-4 w-4" />
+                Randomize
+              </Button>
+            </div>
+            <OptionSelector />
+            <ViolationWatcher
               {...{
                 primary,
                 secondary,
                 tonal,
                 background,
               }}
-              className={css`
-                width: 100%;
-                height: 100%;
-                transition: border-radius ease 0.2s;
-                border-radius: ${borderRadii[rounding]};
-              `}
-              id="model"
             />
-          </AspectRatio>
-          <div
-            className={css`
-              display: flex;
-              gap: 1rem;
-              width: 100%;
-              flex-direction: column;
-              align-items: center;
-            `}
-          >
-            <RoundingSelector
-              value={rounding}
-              onChange={(value) => {
-                setRounding(value);
-              }}
-            />
-            <section
-              className={css`
-                display: flex;
-                flex-flow: row wrap;
-                justify-content: center;
-                width: 100%;
-                gap: 0.5rem;
-              `}
-            >
-              <ColorSelector
-                value={primary}
-                setValue={setPrimary}
-                lock={primaryLock}
-                setLock={setPrimaryLock}
-              />
-              <ColorSelector
-                value={secondary}
-                setValue={setSecondary}
-                lock={secondaryLock}
-                setLock={setSecondaryLock}
-              />
-              <ColorSelector
-                value={tonal}
-                setValue={setTonal}
-                lock={tonalLock}
-                setLock={setTonalLock}
-              />
-            </section>
-            <Button
-              variant="secondary"
-              onClick={randomize}
-              className={css`
-                width: 100%;
-              `}
-            >
-              <FiShuffle className="mr-2 h-4 w-4" />
-              Randomize
-            </Button>
+            <ExportSelector />
           </div>
-          <OptionSelector />
-          <ContrastWatcher
-            {...{
-              primary,
-              secondary,
-              tonal,
-              background,
-            }}
-          />
-          <ExportSelector />
         </div>
-      </div>
     </ThemeProvider>
   );
 }
-
-export default App;

@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import chroma from "chroma-js";
 import { useMemo, useRef } from "react";
 import { FiLock, FiUnlock } from "react-icons/fi";
@@ -9,23 +9,25 @@ export default function ColorSelector({
   setValue,
   lock,
   setLock,
+  label,
 }: {
   value: string;
   setValue: (value: string) => void;
   lock: boolean;
   setLock: (lock: boolean) => void;
+  label?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const color = useMemo(() => chroma(value), [value]);
-  const isDark = useMemo(() => color.luminance() < 0.5, [color]);
+  const textColor = useMemo(() => (chroma.contrast(color, "white") > 4.5 ? "white" : "black"), [color]);
 
   return (
     <div
       className={css`
         display: flex;
         flex-direction: row;
-        transform-origin: 20% 50%;
+        transform-origin: 20px 50%;
         transition: scale ease 0.2s;
         scale: ${lock ? 0.95 : 1};
         flex: 1;
@@ -53,17 +55,19 @@ export default function ColorSelector({
         `}
       >
         <Button
+          variant="default"
           className={css`
             border-bottom-left-radius: 0;
             border-top-left-radius: 0;
             background-color: ${value};
-            color: ${isDark ? "white" : "black"};
+            color: ${textColor};
             width: 5rem;
             flex: 1;
             &:hover {
               background-color: ${color.alpha(0.8).css()};
             }
           `}
+          title={label}
           onClick={() => {
             inputRef.current?.click();
           }}
