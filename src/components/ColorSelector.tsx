@@ -20,7 +20,10 @@ export default function ColorSelector({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const color = useMemo(() => chroma(value), [value]);
-  const textColor = useMemo(() => (chroma.contrast(color, "white") > 4.5 ? "white" : "black"), [color]);
+  const textColor = useMemo(
+    () => (chroma.contrast(color, "white") > 4.5 ? "white" : "black"),
+    [color]
+  );
 
   return (
     <div
@@ -57,6 +60,9 @@ export default function ColorSelector({
         <Button
           variant="default"
           className={css`
+            display: flex;
+            flex-direction: column;
+            align-items: start;
             border-bottom-left-radius: 0;
             border-top-left-radius: 0;
             background-color: ${value};
@@ -67,11 +73,11 @@ export default function ColorSelector({
               background-color: ${color.alpha(0.8).css()};
             }
           `}
-          title={label}
           onClick={() => {
             inputRef.current?.click();
           }}
         >
+          {label ? <span className="text-xs opacity-70 -mb-0.5">{label}</span> : null}
           {value}
         </Button>
         <input
