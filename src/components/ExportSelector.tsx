@@ -42,8 +42,8 @@ export default function ExportSelector() {
    */
   const share = () => {
     navigator.share({
-      title: "Color Generator",
-      text: "Generate colors and export them as code",
+      title: "Avatar creator",
+      text: "Check out this cool avatar I made! 🎨",
       url: window.location.href,
     });
   };
