@@ -160,7 +160,7 @@ export default function App() {
           width: 100vw;
           display: flex;
           justify-content: center;
-          padding-top: clamp(2rem, 10vw, 8rem);
+          padding-top: clamp(5rem, 10vw, 8rem);
           padding-bottom: clamp(1rem, 5vw, 4rem);
         `}
       >

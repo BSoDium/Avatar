@@ -10,10 +10,11 @@ export default function Socials() {
         position: fixed;
         top: 1rem;
         right: 1rem;
+        max-width: 100vw;
         display: flex;
         flex-direction: row;
         gap: 0.5rem;
-      `}
+        `}
     >
       <Button variant="ghost" asChild>
         <Link to="https://github.com/BSoDium/Avatar/fork" target="_blank">
