@@ -7,7 +7,7 @@ export default function Socials() {
   return (
     <div
       className={css`
-        position: fixed;
+        position: absolute;
         top: 1rem;
         right: 1rem;
         max-width: 100vw;
