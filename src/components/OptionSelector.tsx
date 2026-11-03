@@ -2,8 +2,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { css } from "@emotion/css";
 import { MouseEvent, ReactNode } from "react";
-import { PiEyeglassesLight } from "react-icons/pi";
-import { FiMoon } from "react-icons/fi";
+import { PiEyeglassesLight, PiMoonLight } from "react-icons/pi";
 
 function Option({
   id,
@@ -103,7 +102,7 @@ export default function OptionSelector({
       />
       <Option
         id="dark-switch"
-        icon={<FiMoon className={iconClass} />}
+        icon={<PiMoonLight className={iconClass} />}
         title="Dark background"
         description="Generate a dark or a light palette"
         checked={dark}
