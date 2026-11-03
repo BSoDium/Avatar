@@ -1,4 +1,5 @@
 import { Colors } from "@/assets/Model";
+import { violations } from "@/lib/palette";
 import chroma from "chroma-js";
 import { useEffect, useMemo, useState } from "react";
 import { css } from "@emotion/css";
@@ -28,61 +29,12 @@ export default function ViolationWatcher(colors: Colors) {
   const [expanded, setExpanded] = useState(false);
 
   const warnings = useMemo(() => {
-    const warnings: Warning[] = [];
-
-    // contrast
-    if (chroma.contrast(colors.tonal, colors.background) < 1.2) {
-      warnings.push({
-        type: "contrast",
-        title: "Low contrast: Tonal color",
-        message: "Tonal color doesn't have enough contrast with the background",
-        colors: [colors.tonal, colors.background],
-      });
-    }
-    if (chroma.contrast(colors.secondary, colors.background) < 1.2) {
-      warnings.push({
-        type: "contrast",
-        title: "Low contrast: Secondary color",
-        message:
-          "Secondary color doesn't have enough contrast with the background",
-        colors: [colors.secondary, colors.background],
-      });
-    }
-    if (chroma.contrast(colors.primary, colors.background) < 1.2) {
-      warnings.push({
-        type: "contrast",
-        title: "Low contrast: Primary color",
-        message:
-          "Primary color doesn't have enough contrast with the background",
-        colors: [colors.primary, colors.background],
-      });
-    }
-    if (chroma.contrast(colors.secondary, colors.primary) < 1) {
-      warnings.push({
-        type: "contrast",
-        title: "Low contrast: Secondary color",
-        message:
-          "Secondary color doesn't have enough contrast with the primary color",
-        colors: [colors.secondary, colors.primary],
-      });
-    }
-    if (chroma.contrast(colors.background, "white") < 1.2) {
-      warnings.push({
-        type: "contrast",
-        title: "Low contrast: Background color",
-        message:
-          "Background color doesn't have enough contrast with white elements",
-        colors: [colors.background, "white"],
-      });
-    }
-    if (chroma.contrast(colors.tonal, "white") < 1.2) {
-      warnings.push({
-        type: "contrast",
-        title: "Low contrast: Tonal color",
-        message: "Tonal color doesn't have enough contrast with white elements",
-        colors: [colors.tonal, "white"],
-      });
-    }
+    const warnings: Warning[] = violations(colors).map((rule) => ({
+      type: "contrast",
+      title: rule.title,
+      message: `${rule.message} (${chroma.contrast(rule.a, rule.b).toFixed(1)}:1, at least ${rule.min}:1 needed)`,
+      colors: [rule.a, rule.b],
+    }));
 
     // background brightness
     if (chroma(colors.background).luminance() > 0.95) {

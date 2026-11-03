@@ -1,15 +1,79 @@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { css } from "@emotion/css";
-import { MouseEvent } from "react";
+import { MouseEvent, ReactNode } from "react";
 import { PiEyeglassesLight } from "react-icons/pi";
+import { FiMoon } from "react-icons/fi";
+
+function Option({
+  id,
+  icon,
+  title,
+  description,
+  checked,
+  onChange,
+}: {
+  id: string;
+  icon: ReactNode;
+  title: string;
+  description: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <div
+      className={css`
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+      `}
+    >
+      <Label
+        htmlFor={id}
+        className={css`
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.9rem;
+          cursor: pointer;
+        `}
+      >
+        {icon}
+        <p
+          className={css`
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+          `}
+        >
+          {title}
+          <span className="text-xs text-muted-foreground">{description}</span>
+        </p>
+      </Label>
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
+const iconClass = `h-8 w-8 ${css`
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale(1.1);
+  }
+`}`;
 
 export default function OptionSelector({
   glasses,
   onGlassesChange,
+  dark,
+  onDarkChange,
 }: {
   glasses: boolean;
   onGlassesChange: (value: boolean) => void;
+  dark: boolean;
+  onDarkChange: (value: boolean) => void;
 }) {
   const easterEgg = (event: MouseEvent) => {
     event.preventDefault(); // the icon sits in the glasses label, do not toggle the switch
@@ -24,49 +88,26 @@ export default function OptionSelector({
     <div
       className={css`
         display: flex;
+        flex-direction: column;
         gap: 1rem;
-        align-items: center;
         width: 100%;
-        justify-content: space-between;
       `}
     >
-      <Label
-        htmlFor="glasses-switch"
-        className={css`
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 0.9rem;
-          cursor: pointer;
-        `}
-      >
-        <PiEyeglassesLight
-          className={`h-8 w-8 ${css`
-            transition: transform 0.2s;
-            &:hover {
-              transform: scale(1.1);
-            }
-          `}`}
-          onClick={easterEgg}
-        />
-        <p
-          className={css`
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-          `}
-          onClick={() => onGlassesChange(!glasses)}
-        >
-          Display glasses
-          <span className="text-xs text-muted-foreground">
-            Show or hide the glasses on the model
-          </span>
-        </p>
-      </Label>
-      <Switch
+      <Option
         id="glasses-switch"
+        icon={<PiEyeglassesLight className={iconClass} onClick={easterEgg} />}
+        title="Display glasses"
+        description="Show or hide the glasses on the model"
         checked={glasses}
-        onClick={() => onGlassesChange(!glasses)}
+        onChange={onGlassesChange}
+      />
+      <Option
+        id="dark-switch"
+        icon={<FiMoon className={iconClass} />}
+        title="Dark background"
+        description="Generate a dark or a light palette"
+        checked={dark}
+        onChange={onDarkChange}
       />
     </div>
   );

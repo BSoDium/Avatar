@@ -34,6 +34,7 @@ This will launch the Avatar generator in your default web browser, where you can
 
 - **Palette Customization**: Effortlessly change the color palette of your avatar to match your preferences or branding.
 - **Export Functionality**: Conveniently export your personalized avatar as an SVG file for use across various platforms, or rasterize it as a PNG file.
+- **Accessible palette generation**: Randomize and derived colors are generated in OKLCH and fitted to contrast rules (see `src/lib/palette.ts`), in light or dark background mode.
 - **Contrast Checker**: Ensure that your avatar's color palette meets accessibility standards by using the built-in contrast checker.
 - **Avatar shape preview**: Preview your avatar in different shapes, such as square, circle, and rounded square.
 

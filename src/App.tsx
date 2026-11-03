@@ -4,7 +4,7 @@ import { css } from "@emotion/css";
 import colors from "@/assets/colors.json";
 import { useEffect, useState } from "react";
 import Model from "./assets/Model";
-import chroma from "chroma-js";
+import { complete, hairColors, isDark, randomPrimary } from "@/lib/palette";
 import {
   Rounding,
   roundingOptions,
@@ -26,79 +26,6 @@ const borderRadii: Record<Rounding, string> = {
   squircle: "30%",
   square: "calc(var(--radius) - 2px)",
 };
-
-/**
- * Generate tonal color
- * @param primary the primary color
- * @returns the adjusted tonal color
- */
-function genTonal(primary: string) {
-  const primaryColor = chroma(primary).hsl();
-  return chroma
-    .hsl(
-      primaryColor[0],
-      primaryColor[1] * 1.3,
-      Math.max(Math.min(primaryColor[2] * 1.3, 1), 0.7)
-    )
-    .hex();
-}
-
-/**
- * Generate secondary color
- * @param primary the primary color
- * @returns the adjusted secondary color
- */
-function genSecondary(primary: string) {
-  const primaryColor = chroma(primary).hsl();
-  return chroma
-    .hsl(primaryColor[0] + 180, primaryColor[1] * 0.5, primaryColor[2] * 0.9)
-    .hex();
-}
-
-/**
- * Generate background color
- * @param primary the primary color
- * @returns the adjusted background color
- */
-function genBackground(primary: string) {
-  const primaryColor = chroma(primary).hsl();
-  return chroma.hsl(primaryColor[0], primaryColor[1] * 0.5, 0.9).hex();
-}
-
-function randomColor(
-  {
-    minHue = 0,
-    maxHue = 360,
-    minSaturation = 0.5,
-    maxSaturation = 1,
-    minLightness = 0.5,
-    maxLightness = 0.9,
-  }: {
-    minHue?: number;
-    maxHue?: number;
-    minSaturation?: number;
-    maxSaturation?: number;
-    minLightness?: number;
-    maxLightness?: number;
-  } = {
-    minHue: 0,
-    maxHue: 360,
-    minSaturation: 0.5,
-    maxSaturation: 1,
-    minLightness: 0.5,
-    maxLightness: 0.9,
-  }
-) {
-  return chroma
-    .hsl(
-      Math.random() * (maxHue - minHue) + minHue,
-      Math.random() * (maxSaturation - minSaturation) + minSaturation,
-      Math.random() * (maxLightness - minLightness) + minLightness
-    )
-    .hex();
-}
-
-const hairColors = ["#000000", "#2B1B14", "#5A3825", "#B5651D", "#D9B26F", "#8A8A8A"];
 
 export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -129,6 +56,7 @@ export default function App() {
 
   // Options
   const [glasses, setGlasses] = useState(false);
+  const [dark, setDark] = useState(isDark(background));
 
   // Update URL search params
   useEffect(() => {
@@ -150,28 +78,50 @@ export default function App() {
     hair,
   ]);
 
-  // Relational color generation: the other colors follow the primary one
-  const changePrimary = (value: string) => {
-    setPrimary(value);
-    if (!tonalLock) setTonal(genTonal(value));
-    if (!secondaryLock) setSecondary(genSecondary(value));
-    if (!backgroundLock) setBackground(genBackground(value));
+  const palette = { primary, secondary, tonal, background, hair };
+  const locks = {
+    secondary: secondaryLock,
+    tonal: tonalLock,
+    background: backgroundLock,
+    hair: hairLock,
+  };
+
+  const apply = (next: typeof palette) => {
+    setPrimary(next.primary);
+    setSecondary(next.secondary);
+    setTonal(next.tonal);
+    setBackground(next.background);
+    setHair(next.hair);
+  };
+
+  // Relational color generation: the other colors follow the shirt and hair colors
+  const changePrimary = (value: string) =>
+    apply(complete({ ...palette, primary: value }, locks, dark));
+
+  const changeHair = (value: string) =>
+    apply(complete({ ...palette, hair: value }, locks, dark));
+
+  const changeDark = (value: boolean) => {
+    setDark(value);
+    apply(complete(palette, locks, value));
   };
 
   // Random color generation
   const randomize = () => {
-    if (primaryLock) {
-      if (!tonalLock) setTonal(randomColor({ minLightness: 0.5 }));
-      if (!secondaryLock) setSecondary(randomColor());
-      if (!backgroundLock)
-        setBackground(
-          randomColor({ maxSaturation: 0.6, minLightness: 0.8, maxLightness: 0.95 })
-        );
-    } else {
-      changePrimary(randomColor());
-    }
-    if (!hairLock)
-      setHair(hairColors[Math.floor(Math.random() * hairColors.length)]);
+    apply(
+      complete(
+        {
+          ...palette,
+          primary: primaryLock ? primary : randomPrimary(),
+          hair: hairLock
+            ? hair
+            : hairColors[Math.floor(Math.random() * hairColors.length)],
+        },
+        locks,
+        dark,
+        true
+      )
+    );
   };
 
   return (
@@ -199,7 +149,7 @@ export default function App() {
         >
           <AspectRatio ratio={1}>
             <Model
-              {...{ primary, secondary, tonal, background, hair }}
+              {...palette}
               glasses={glasses}
               className={css`
                 width: 100%;
@@ -264,7 +214,7 @@ export default function App() {
               />
               <ColorSelector
                 value={hair}
-                setValue={setHair}
+                setValue={changeHair}
                 lock={hairLock}
                 setLock={setHairLock}
                 label="Hair"
@@ -284,8 +234,10 @@ export default function App() {
           <OptionSelector
             glasses={glasses}
             onGlassesChange={setGlasses}
+            dark={dark}
+            onDarkChange={changeDark}
           />
-          <ViolationWatcher {...{ primary, secondary, tonal, background, hair }} />
+          <ViolationWatcher {...palette} />
           <ExportSelector />
         </div>
       </div>
