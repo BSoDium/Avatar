@@ -3,6 +3,15 @@ import colors from "./colors.json";
 
 export type Colors = typeof colors;
 
-export default function Model(props: Colors & ComponentProps<"svg">) {
+export type Options = {
+  /** Show the glasses */
+  glasses?: boolean;
+};
+
+export default function Model({
+  glasses = false,
+  ...props
+}: Colors & Options & ComponentProps<"svg">) {
+  const { ...svgProps } = props;
   return <slot />;
 }

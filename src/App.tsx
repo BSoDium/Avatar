@@ -2,7 +2,7 @@ import "./App.global.scss";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { css } from "@emotion/css";
 import colors from "@/assets/colors.json";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Model from "./assets/Model";
 import chroma from "chroma-js";
 import {
@@ -98,6 +98,8 @@ function randomColor(
     .hex();
 }
 
+const hairColors = ["#000000", "#2B1B14", "#5A3825", "#B5651D", "#D9B26F", "#8A8A8A"];
+
 export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -105,6 +107,8 @@ export default function App() {
   const [primaryLock, setPrimaryLock] = useState(false);
   const [secondaryLock, setSecondaryLock] = useState(false);
   const [tonalLock, setTonalLock] = useState(false);
+  const [backgroundLock, setBackgroundLock] = useState(false);
+  const [hairLock, setHairLock] = useState(true);
 
   // Color states
   const [primary, setPrimary] = useState(
@@ -114,41 +118,60 @@ export default function App() {
     searchParams.get("secondary") || colors.secondary
   );
   const [tonal, setTonal] = useState(searchParams.get("tonal") || colors.tonal);
+  const [background, setBackground] = useState(
+    searchParams.get("background") || colors.background
+  );
+  const [hair, setHair] = useState(searchParams.get("hair") || colors.hair);
 
   const [rounding, setRounding] = useState<Rounding>(
     (searchParams.get("rounding") as Rounding) || roundingOptions[0]
   );
+
+  // Options
+  const [glasses, setGlasses] = useState(false);
 
   // Update URL search params
   useEffect(() => {
     searchParams.set("primary", primary);
     searchParams.set("secondary", secondary);
     searchParams.set("tonal", tonal);
+    searchParams.set("background", background);
+    searchParams.set("hair", hair);
     searchParams.set("rounding", rounding);
     setSearchParams(searchParams);
-  }, [primary, rounding, searchParams, secondary, setSearchParams, tonal]);
+  }, [
+    primary,
+    rounding,
+    searchParams,
+    secondary,
+    setSearchParams,
+    tonal,
+    background,
+    hair,
+  ]);
 
-  // Relational color generation
-  useEffect(() => {
-    if (!tonalLock) setTonal(genTonal(primary));
-  }, [primary, tonalLock]);
-
-  useEffect(() => {
-    if (!secondaryLock) setSecondary(genSecondary(primary));
-  }, [primary, secondaryLock]);
-
-  const background = useMemo(() => {
-    return genBackground(primary);
-  }, [primary]);
+  // Relational color generation: the other colors follow the primary one
+  const changePrimary = (value: string) => {
+    setPrimary(value);
+    if (!tonalLock) setTonal(genTonal(value));
+    if (!secondaryLock) setSecondary(genSecondary(value));
+    if (!backgroundLock) setBackground(genBackground(value));
+  };
 
   // Random color generation
   const randomize = () => {
     if (primaryLock) {
       if (!tonalLock) setTonal(randomColor({ minLightness: 0.5 }));
       if (!secondaryLock) setSecondary(randomColor());
+      if (!backgroundLock)
+        setBackground(
+          randomColor({ maxSaturation: 0.6, minLightness: 0.8, maxLightness: 0.95 })
+        );
     } else {
-      setPrimary(randomColor());
+      changePrimary(randomColor());
     }
+    if (!hairLock)
+      setHair(hairColors[Math.floor(Math.random() * hairColors.length)]);
   };
 
   return (
@@ -176,12 +199,8 @@ export default function App() {
         >
           <AspectRatio ratio={1}>
             <Model
-              {...{
-                primary,
-                secondary,
-                tonal,
-                background,
-              }}
+              {...{ primary, secondary, tonal, background, hair }}
+              glasses={glasses}
               className={css`
                 width: 100%;
                 height: 100%;
@@ -217,24 +236,38 @@ export default function App() {
             >
               <ColorSelector
                 value={primary}
-                setValue={setPrimary}
+                setValue={changePrimary}
                 lock={primaryLock}
                 setLock={setPrimaryLock}
-                label="Primary"
+                label="Shirt"
               />
               <ColorSelector
                 value={secondary}
                 setValue={setSecondary}
                 lock={secondaryLock}
                 setLock={setSecondaryLock}
-                label="Secondary"
+                label="Jacket"
               />
               <ColorSelector
                 value={tonal}
                 setValue={setTonal}
                 lock={tonalLock}
                 setLock={setTonalLock}
-                label="Tonal"
+                label="Skin"
+              />
+              <ColorSelector
+                value={background}
+                setValue={setBackground}
+                lock={backgroundLock}
+                setLock={setBackgroundLock}
+                label="Background"
+              />
+              <ColorSelector
+                value={hair}
+                setValue={setHair}
+                lock={hairLock}
+                setLock={setHairLock}
+                label="Hair"
               />
             </section>
             <Button
@@ -248,15 +281,11 @@ export default function App() {
               Randomize
             </Button>
           </div>
-          <OptionSelector />
-          <ViolationWatcher
-            {...{
-              primary,
-              secondary,
-              tonal,
-              background,
-            }}
+          <OptionSelector
+            glasses={glasses}
+            onGlassesChange={setGlasses}
           />
+          <ViolationWatcher {...{ primary, secondary, tonal, background, hair }} />
           <ExportSelector />
         </div>
       </div>

@@ -85,14 +85,7 @@ export default function ViolationWatcher(colors: Colors) {
     }
 
     // background brightness
-    if (chroma(colors.background).luminance() < 0.7) {
-      warnings.push({
-        type: "brightness",
-        title: "Dark background",
-        message: "Background color is too dark",
-        colors: [colors.background],
-      });
-    } else if (chroma(colors.background).luminance() > 0.95) {
+    if (chroma(colors.background).luminance() > 0.95) {
       warnings.push({
         type: "brightness",
         title: "Bright background",

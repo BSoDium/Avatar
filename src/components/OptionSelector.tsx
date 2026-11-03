@@ -1,22 +1,18 @@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { css } from "@emotion/css";
+import { MouseEvent } from "react";
 import { PiEyeglassesLight } from "react-icons/pi";
-import { useEffect, useState } from "react";
 
-export default function OptionSelector() {
-  const [showGlasses, setShowGlasses] = useState(false);
-
-  const svg = document.querySelector("svg#model") as SVGElement | null;
-
-  useEffect(() => {
-    if (!svg) return;
-    const glasses = svg.querySelector("#glasses") as SVGElement | null;
-    if (!glasses) return;
-    glasses.style.display = showGlasses ? "block" : "none";
-  }, [svg, showGlasses]);
-
-  const easterEgg = () => {
+export default function OptionSelector({
+  glasses,
+  onGlassesChange,
+}: {
+  glasses: boolean;
+  onGlassesChange: (value: boolean) => void;
+}) {
+  const easterEgg = (event: MouseEvent) => {
+    event.preventDefault(); // the icon sits in the glasses label, do not toggle the switch
     const duration = 4000;
     document.body.style.animation = `degressive-blur ${duration}ms`;
     setTimeout(() => {
@@ -35,7 +31,7 @@ export default function OptionSelector() {
       `}
     >
       <Label
-        htmlFor="glasses"
+        htmlFor="glasses-switch"
         className={css`
           display: flex;
           flex-direction: row;
@@ -59,7 +55,7 @@ export default function OptionSelector() {
             flex-direction: column;
             gap: 0.3rem;
           `}
-          onClick={() => setShowGlasses(!showGlasses)}
+          onClick={() => onGlassesChange(!glasses)}
         >
           Display glasses
           <span className="text-xs text-muted-foreground">
@@ -68,9 +64,9 @@ export default function OptionSelector() {
         </p>
       </Label>
       <Switch
-        id="glasses"
-        checked={showGlasses}
-        onClick={() => setShowGlasses(!showGlasses)}
+        id="glasses-switch"
+        checked={glasses}
+        onClick={() => onGlassesChange(!glasses)}
       />
     </div>
   );
