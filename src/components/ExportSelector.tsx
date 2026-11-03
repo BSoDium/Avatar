@@ -49,12 +49,23 @@ export default function ExportSelector() {
   };
 
   /**
+   * Serialize the current SVG, without the hidden parts of the model
+   */
+  const serializeSVG = () => {
+    const svg = document.querySelector("svg#model");
+    if (!svg) return null;
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.querySelectorAll('[display="none"]').forEach((el) => el.remove());
+    return new XMLSerializer().serializeToString(clone);
+  };
+
+  /**
    * Download the current SVG as a file
    */
   const downloadSVG = () => {
-    const svg = document.querySelector("svg#model");
-    if (!svg) return;
-    const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
+    const svgString = serializeSVG();
+    if (!svgString) return;
+    const blob = new Blob([svgString], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -67,11 +78,10 @@ export default function ExportSelector() {
    * Download the current SVG as a PNG file
    */
   const downloadPNG = () => {
-    const svg = document.querySelector("svg#model");
-    if (!svg) return;
+    const svgString = serializeSVG();
+    if (!svgString) return;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
-    const svgString = new XMLSerializer().serializeToString(svg);
     const img = new Image();
     const blob = new Blob([svgString], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);

@@ -2,9 +2,9 @@ import "./App.global.scss";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { css } from "@emotion/css";
 import colors from "@/assets/colors.json";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Model from "./assets/Model";
-import chroma from "chroma-js";
+import { complete, hairColors, isDark, randomPrimary } from "@/lib/palette";
 import {
   Rounding,
   roundingOptions,
@@ -27,77 +27,6 @@ const borderRadii: Record<Rounding, string> = {
   square: "calc(var(--radius) - 2px)",
 };
 
-/**
- * Generate tonal color
- * @param primary the primary color
- * @returns the adjusted tonal color
- */
-function genTonal(primary: string) {
-  const primaryColor = chroma(primary).hsl();
-  return chroma
-    .hsl(
-      primaryColor[0],
-      primaryColor[1] * 1.3,
-      Math.max(Math.min(primaryColor[2] * 1.3, 1), 0.7)
-    )
-    .hex();
-}
-
-/**
- * Generate secondary color
- * @param primary the primary color
- * @returns the adjusted secondary color
- */
-function genSecondary(primary: string) {
-  const primaryColor = chroma(primary).hsl();
-  return chroma
-    .hsl(primaryColor[0] + 180, primaryColor[1] * 0.5, primaryColor[2] * 0.9)
-    .hex();
-}
-
-/**
- * Generate background color
- * @param primary the primary color
- * @returns the adjusted background color
- */
-function genBackground(primary: string) {
-  const primaryColor = chroma(primary).hsl();
-  return chroma.hsl(primaryColor[0], primaryColor[1] * 0.5, 0.9).hex();
-}
-
-function randomColor(
-  {
-    minHue = 0,
-    maxHue = 360,
-    minSaturation = 0.5,
-    maxSaturation = 1,
-    minLightness = 0.5,
-    maxLightness = 0.9,
-  }: {
-    minHue?: number;
-    maxHue?: number;
-    minSaturation?: number;
-    maxSaturation?: number;
-    minLightness?: number;
-    maxLightness?: number;
-  } = {
-    minHue: 0,
-    maxHue: 360,
-    minSaturation: 0.5,
-    maxSaturation: 1,
-    minLightness: 0.5,
-    maxLightness: 0.9,
-  }
-) {
-  return chroma
-    .hsl(
-      Math.random() * (maxHue - minHue) + minHue,
-      Math.random() * (maxSaturation - minSaturation) + minSaturation,
-      Math.random() * (maxLightness - minLightness) + minLightness
-    )
-    .hex();
-}
-
 export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -105,6 +34,8 @@ export default function App() {
   const [primaryLock, setPrimaryLock] = useState(false);
   const [secondaryLock, setSecondaryLock] = useState(false);
   const [tonalLock, setTonalLock] = useState(false);
+  const [backgroundLock, setBackgroundLock] = useState(false);
+  const [hairLock, setHairLock] = useState(true);
 
   // Color states
   const [primary, setPrimary] = useState(
@@ -114,41 +45,83 @@ export default function App() {
     searchParams.get("secondary") || colors.secondary
   );
   const [tonal, setTonal] = useState(searchParams.get("tonal") || colors.tonal);
+  const [background, setBackground] = useState(
+    searchParams.get("background") || colors.background
+  );
+  const [hair, setHair] = useState(searchParams.get("hair") || colors.hair);
 
   const [rounding, setRounding] = useState<Rounding>(
     (searchParams.get("rounding") as Rounding) || roundingOptions[0]
   );
+
+  // Options
+  const [glasses, setGlasses] = useState(false);
+  const [dark, setDark] = useState(isDark(background));
 
   // Update URL search params
   useEffect(() => {
     searchParams.set("primary", primary);
     searchParams.set("secondary", secondary);
     searchParams.set("tonal", tonal);
+    searchParams.set("background", background);
+    searchParams.set("hair", hair);
     searchParams.set("rounding", rounding);
     setSearchParams(searchParams);
-  }, [primary, rounding, searchParams, secondary, setSearchParams, tonal]);
+  }, [
+    primary,
+    rounding,
+    searchParams,
+    secondary,
+    setSearchParams,
+    tonal,
+    background,
+    hair,
+  ]);
 
-  // Relational color generation
-  useEffect(() => {
-    if (!tonalLock) setTonal(genTonal(primary));
-  }, [primary, tonalLock]);
+  const palette = { primary, secondary, tonal, background, hair };
+  const locks = {
+    secondary: secondaryLock,
+    tonal: tonalLock,
+    background: backgroundLock,
+    hair: hairLock,
+  };
 
-  useEffect(() => {
-    if (!secondaryLock) setSecondary(genSecondary(primary));
-  }, [primary, secondaryLock]);
+  const apply = (next: typeof palette) => {
+    setPrimary(next.primary);
+    setSecondary(next.secondary);
+    setTonal(next.tonal);
+    setBackground(next.background);
+    setHair(next.hair);
+  };
 
-  const background = useMemo(() => {
-    return genBackground(primary);
-  }, [primary]);
+  // Relational color generation: the other colors follow the shirt and hair colors
+  const changePrimary = (value: string) =>
+    apply(complete({ ...palette, primary: value }, locks, dark));
+
+  const changeHair = (value: string) =>
+    apply(complete({ ...palette, hair: value }, locks, dark));
+
+  const changeDark = (value: boolean) => {
+    setDark(value);
+    apply(complete(palette, locks, value));
+  };
 
   // Random color generation
   const randomize = () => {
-    if (primaryLock) {
-      if (!tonalLock) setTonal(randomColor({ minLightness: 0.5 }));
-      if (!secondaryLock) setSecondary(randomColor());
-    } else {
-      setPrimary(randomColor());
-    }
+    apply(
+      complete(
+        {
+          ...palette,
+          primary: primaryLock ? primary : randomPrimary(),
+          hair: hairLock
+            ? hair
+            : hairColors[Math.floor(Math.random() * hairColors.length)],
+        },
+        locks,
+        dark,
+        true
+      )
+    );
   };
 
   return (
@@ -176,12 +149,8 @@ export default function App() {
         >
           <AspectRatio ratio={1}>
             <Model
-              {...{
-                primary,
-                secondary,
-                tonal,
-                background,
-              }}
+              {...palette}
+              glasses={glasses}
               className={css`
                 width: 100%;
                 height: 100%;
@@ -217,24 +186,38 @@ export default function App() {
             >
               <ColorSelector
                 value={primary}
-                setValue={setPrimary}
+                setValue={changePrimary}
                 lock={primaryLock}
                 setLock={setPrimaryLock}
-                label="Primary"
+                label="Shirt"
               />
               <ColorSelector
                 value={secondary}
                 setValue={setSecondary}
                 lock={secondaryLock}
                 setLock={setSecondaryLock}
-                label="Secondary"
+                label="Jacket"
               />
               <ColorSelector
                 value={tonal}
                 setValue={setTonal}
                 lock={tonalLock}
                 setLock={setTonalLock}
-                label="Tonal"
+                label="Skin"
+              />
+              <ColorSelector
+                value={background}
+                setValue={setBackground}
+                lock={backgroundLock}
+                setLock={setBackgroundLock}
+                label="Background"
+              />
+              <ColorSelector
+                value={hair}
+                setValue={changeHair}
+                lock={hairLock}
+                setLock={setHairLock}
+                label="Hair"
               />
             </section>
             <Button
@@ -248,15 +231,13 @@ export default function App() {
               Randomize
             </Button>
           </div>
-          <OptionSelector />
-          <ViolationWatcher
-            {...{
-              primary,
-              secondary,
-              tonal,
-              background,
-            }}
+          <OptionSelector
+            glasses={glasses}
+            onGlassesChange={setGlasses}
+            dark={dark}
+            onDarkChange={changeDark}
           />
+          <ViolationWatcher {...palette} />
           <ExportSelector />
         </div>
       </div>
