@@ -15,4 +15,15 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+  overrides: [
+    {
+      // These files export a hook, a variants helper or constants next to their component on purpose
+      files: [
+        'src/components/ui/*.tsx',
+        'src/components/ThemeProvider.tsx',
+        'src/components/RoudingSelector.tsx',
+      ],
+      rules: { 'react-refresh/only-export-components': 'off' },
+    },
+  ],
 }
